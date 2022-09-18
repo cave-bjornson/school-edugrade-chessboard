@@ -1,10 +1,12 @@
-﻿namespace ChessBoard
+﻿using System.Text;
+
+namespace ChessBoard
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            Console.OutputEncoding = System.Text.Encoding.Unicode;
+            Console.OutputEncoding = System.Text.Encoding.Default;
             const ushort MaxSize = 24;
 
             // Interface with the user
@@ -24,20 +26,28 @@
             Console.WriteLine($"Chessboard Size: {size}x{size}");
 
             Console.WriteLine("Enter colors of squares, leave blank to keep default.");
-            char blackSquare = GetSquareChar("black squares", '■');
-            char whiteSquare = GetSquareChar("white squares", '□');
-            char piece = GetSquareChar("chess piece", '♛');
-            
+            Rune blackSquare = getSquare("black squares", Rune.GetRuneAt("■", 0));
+            Rune whiteSquare = getSquare("white squares", Rune.GetRuneAt("□", 0));
+            Rune piece = getSquare("chess piece", Rune.GetRuneAt("♛", 0));
+
             /* 
              * Squares for the chessboard grid stored as array so we can use the
              * 0-1 index when alternating between 0 and 1 in pattern generation.
              */
-            char[] gridSquares = { whiteSquare, blackSquare };
-            
+            Rune[] gridSquares = { whiteSquare, blackSquare, piece };
+            bool wideChars = false;
+            foreach (Rune rune in gridSquares)
+            {
+                if (rune.Utf16SequenceLength > 1)
+                {
+                    wideChars = true;
+                }
+            }
+
             (ushort row, ushort col) = GetCoordinatesFromNotation(size);
 
             // Generate chessboard as 2-dimensional array.
-            char[,] chessBoard = new char[size, size];
+            Rune[,] chessBoard = new Rune[size, size];
             for (int i = 0; i < size; i++)
             {
                 for (int j = 0; j < size; j++)
@@ -47,12 +57,16 @@
             }
             // Place piece char in chessboard array.
             chessBoard[size - 1 - row, col] = piece;
-            
+
             // Write column headers.
             Console.Write("   ");
             for (char letter = 'A'; letter < (char)('A' + size); letter++)
             {
                 Console.Write(letter);
+                if (wideChars)
+                {
+                    Console.Write(" ");
+                }
             }
             Console.WriteLine();
             // Write chessboard array
@@ -68,21 +82,24 @@
             Console.WriteLine();
         }
 
-        static char GetSquareChar(string item, char defaultSquare)
+        static Rune getSquare(string item, Rune defaultSymbol)
         {
-            char square = defaultSquare;
             bool accepted = false;
+            Rune square = Rune.ReplacementChar;
             do
             {
-                Console.Write($"Enter character for {item} (default {defaultSquare}): ");
+                Console.Write($"Enter character for {item} (default {defaultSymbol}): ");
                 string input = Console.ReadLine() ?? "";
-                if (input.Length > 0)
+                Console.WriteLine("input: " + input);
+                Console.WriteLine("inputLength: " + input.Length);
+                if (input.Length <= 3)
                 {
-                    accepted = char.TryParse(input, out square);
+                    square = input.Length == 0 ? defaultSymbol : new Rune(input[0], input[1]);
+                    accepted = true;
                 }
-                if (!accepted)
+                else
                 {
-                    Console.WriteLine("Invalid entry, enter a _single_ unicode character.");
+                    Console.WriteLine("Invalid entry, enter a _single_ character.");
                 }
             } while (!accepted);
             return square;
