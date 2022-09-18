@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System;
+using System.Globalization;
+using System.Text;
 
 namespace ChessBoard
 {
@@ -26,28 +28,32 @@ namespace ChessBoard
             Console.WriteLine($"Chessboard Size: {size}x{size}");
 
             Console.WriteLine("Enter colors of squares, leave blank to keep default.");
-            Rune blackSquare = getSquare("black squares", Rune.GetRuneAt("■", 0));
-            Rune whiteSquare = getSquare("white squares", Rune.GetRuneAt("□", 0));
-            Rune piece = getSquare("chess piece", Rune.GetRuneAt("♛", 0));
+            string blackSquare = getSquare("black squares", "■");
+            Console.WriteLine($"black: {blackSquare}, length: {blackSquare.Length}");
+            string whiteSquare = getSquare("white squares", "□");
+            Console.WriteLine($"white: {whiteSquare}, length: {whiteSquare.Length}");
+            string piece = getSquare("chess piece", "♛");
+            Console.WriteLine($"piece: {piece}, length: {piece.Length}");
 
             /* 
              * Squares for the chessboard grid stored as array so we can use the
              * 0-1 index when alternating between 0 and 1 in pattern generation.
              */
-            Rune[] gridSquares = { whiteSquare, blackSquare, piece };
+            string[] gridSquares = { whiteSquare, blackSquare, piece };
             bool wideChars = false;
-            foreach (Rune rune in gridSquares)
+            foreach (string s in gridSquares)
             {
-                if (rune.Utf16SequenceLength > 1)
+                if (s.Length > 1)
                 {
                     wideChars = true;
                 }
             }
+            Console.WriteLine($"Wide characters: {wideChars}");
 
             (ushort row, ushort col) = GetCoordinatesFromNotation(size);
 
             // Generate chessboard as 2-dimensional array.
-            Rune[,] chessBoard = new Rune[size, size];
+            string[,] chessBoard = new string[size, size];
             for (int i = 0; i < size; i++)
             {
                 for (int j = 0; j < size; j++)
@@ -75,31 +81,42 @@ namespace ChessBoard
                 Console.Write($"{size - i,-3}");
                 for (int j = 0; j < size; j++)
                 {
-                    Console.Write(chessBoard[i, j]);
+                    var currentSquare = chessBoard[i, j];
+                    Console.Write(currentSquare);
+                    if (wideChars)
+                    {
+                        if (currentSquare.Length == 1 || !symbolIsWide(currentSquare))
+                        {
+                            Console.Write(" ");
+                        }
+                    }
                 }
                 Console.WriteLine();
             }
             Console.WriteLine();
         }
 
-        static Rune getSquare(string item, Rune defaultSymbol)
+        static string getSquare(string item, string defaultSymbol)
         {
             bool accepted = false;
-            Rune square = Rune.ReplacementChar;
+            string square = "";
             do
             {
                 Console.Write($"Enter character for {item} (default {defaultSymbol}): ");
                 string input = Console.ReadLine() ?? "";
                 Console.WriteLine("input: " + input);
-                Console.WriteLine("inputLength: " + input.Length);
-                if (input.Length <= 3)
+                // Counts graphemes instead of length because emojis are sequenses of UTF16 characters.
+                var si = new StringInfo(input);
+                Console.WriteLine("stringinfo length elements: " + si.LengthInTextElements);
+                if (si.LengthInTextElements <= 1)
                 {
-                    square = input.Length == 0 ? defaultSymbol : new Rune(input[0], input[1]);
+                    square = si.LengthInTextElements == 0 ? defaultSymbol : input;
+                    Console.WriteLine($"square: {square}");
                     accepted = true;
                 }
                 else
                 {
-                    Console.WriteLine("Invalid entry, enter a _single_ character.");
+                    Console.WriteLine("Invalid entry, enter a _single_ character or leave blank.");
                 }
             } while (!accepted);
             return square;
@@ -140,6 +157,11 @@ namespace ChessBoard
         static bool InRange(int value, int start, int end)
         {
             return value >= start && value <= end;
+        }
+
+        static bool symbolIsWide(string s)
+        {
+            return (s.EnumerateRunes().Count() >= 1);
         }
     }
 }
