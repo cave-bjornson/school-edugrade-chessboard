@@ -1,6 +1,6 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Runtime.InteropServices;
 using System.Text;
+using static ChessBoard.ProgramHelpers;
 
 namespace ChessBoard
 {
@@ -8,32 +8,43 @@ namespace ChessBoard
     {
         static void Main(string[] args)
         {
-            Console.OutputEncoding = System.Text.Encoding.Default;
+            Console.WriteLine("Chessboard Writer");
+            bool onWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+            if (onWindows)
+            {
+                Console.OutputEncoding = System.Text.Encoding.Unicode;
+                Console.InputEncoding = System.Text.Encoding.Unicode;
+                Console.WriteLine("Running on windows. To use emojis, download Windows Terminal\n" +
+                    "https://www.microsoft.com/store/productId/9N0DX20HK701\n" +
+                    "if you can't see a crown here: 👑");
+                Console.WriteLine("Otherwise use alphanumerical characters and simpler symbols");
+            }
+            else
+            {
+                Console.OutputEncoding = System.Text.Encoding.Default;
+                Console.InputEncoding = System.Text.Encoding.Default;
+                Console.WriteLine("You're on a mac, great! Hope you're using iTerm!");
+            }
+
             const ushort MaxSize = 24;
 
-            // Interface with the user
-            Console.Write($"Enter size of chessboard (1-{MaxSize}): ");
-            ushort size;
-            while (true)
-            {
-                if (ushort.TryParse(Console.ReadLine(), out size))
-                {
-                    if (InRange(size, 1, MaxSize))
-                    {
-                        break;
-                    }
-                }
-                Console.Write($"Enter a _number_ between 1 and {MaxSize}: ");
-            }
+            string sizeString = ReadAndValidateInput(
+                message: $"Enter size of chessboard (1-{MaxSize}). Default is 8: ",
+                errorMessage: $"Enter a _number_ between 1 and {MaxSize}: ",
+                inputValidator: NumberInRangeValidator,
+                constraints: new { start = 1, end = MaxSize }); 
+
+            ushort size = ushort.Parse(sizeString);
             Console.WriteLine($"Chessboard Size: {size}x{size}");
 
-            Console.WriteLine("Enter colors of squares, leave blank to keep default.");
-            string blackSquare = getSquare("black squares", "■");
-            Console.WriteLine($"black: {blackSquare}, length: {blackSquare.Length}");
-            string whiteSquare = getSquare("white squares", "□");
-            Console.WriteLine($"white: {whiteSquare}, length: {whiteSquare.Length}");
-            string piece = getSquare("chess piece", "♛");
-            Console.WriteLine($"piece: {piece}, length: {piece.Length}");
+            if (onWindows)
+            {
+                Console.WriteLine(String.Format("If pasting or inserting emoji character, input will look like {0}{0} or {0}.", Rune.ReplacementChar));
+                Console.WriteLine("Don't worry, Output will be preserved");
+            }
+            string blackSquare = ReadSquare(symbolName: "black squares", defaultSymbol: "■");
+            string whiteSquare = ReadSquare(symbolName: "white squares", defaultSymbol: "□");
+            string piece = ReadSquare(symbolName: "chess piece", defaultSymbol: "♛");
 
             /* 
              * Squares for the chessboard grid stored as array so we can use the
@@ -41,16 +52,14 @@ namespace ChessBoard
              */
             string[] gridSquares = { whiteSquare, blackSquare, piece };
             bool wideChars = false;
-            foreach (string s in gridSquares)
+            // If at least one symbol is wide the entire chessboard needs to be.
+            int symbolIdx = 0;
+            while (symbolIdx < gridSquares.Length && !wideChars)
             {
-                if (s.Length > 1)
-                {
-                    wideChars = true;
-                }
+                wideChars = SymbolIsWide(gridSquares[symbolIdx++]);
             }
-            Console.WriteLine($"Wide characters: {wideChars}");
 
-            (ushort row, ushort col) = GetCoordinatesFromNotation(size);
+            (ushort row, ushort col) = ReadCoordinatesFromNotation(size);
 
             // Generate chessboard as 2-dimensional array.
             string[,] chessBoard = new string[size, size];
@@ -62,22 +71,25 @@ namespace ChessBoard
                 }
             }
             // Place piece char in chessboard array.
-            chessBoard[size - 1 - row, col] = piece;
+            chessBoard[size - row - 1, col] = piece;
 
             // Write column headers.
             Console.Write("   ");
-            for (char letter = 'A'; letter < (char)('A' + size); letter++)
+            for (char columnLetter = 'A'; columnLetter < (char)('A' + size); columnLetter++)
             {
-                Console.Write(letter);
+                Console.Write(columnLetter);
+                // Some symbols need extra spacing so this aligns the column headers.
                 if (wideChars)
                 {
                     Console.Write(" ");
                 }
             }
             Console.WriteLine();
+
             // Write chessboard array
             for (int i = 0; i < size; i++)
             {
+                // This is the rowheader. Width is dependent on size of board.
                 Console.Write($"{size - i,-3}");
                 for (int j = 0; j < size; j++)
                 {
@@ -85,7 +97,8 @@ namespace ChessBoard
                     Console.Write(currentSquare);
                     if (wideChars)
                     {
-                        if (currentSquare.Length == 1 || !symbolIsWide(currentSquare))
+                        // Some symbols need extra spacing to align with wider symbols.
+                        if (currentSquare.Length == 1 || !SymbolIsWide(currentSquare))
                         {
                             Console.Write(" ");
                         }
@@ -94,74 +107,6 @@ namespace ChessBoard
                 Console.WriteLine();
             }
             Console.WriteLine();
-        }
-
-        static string getSquare(string item, string defaultSymbol)
-        {
-            bool accepted = false;
-            string square = "";
-            do
-            {
-                Console.Write($"Enter character for {item} (default {defaultSymbol}): ");
-                string input = Console.ReadLine() ?? "";
-                Console.WriteLine("input: " + input);
-                // Counts graphemes instead of length because emojis are sequenses of UTF16 characters.
-                var si = new StringInfo(input);
-                Console.WriteLine("stringinfo length elements: " + si.LengthInTextElements);
-                if (si.LengthInTextElements <= 1)
-                {
-                    square = si.LengthInTextElements == 0 ? defaultSymbol : input;
-                    Console.WriteLine($"square: {square}");
-                    accepted = true;
-                }
-                else
-                {
-                    Console.WriteLine("Invalid entry, enter a _single_ character or leave blank.");
-                }
-            } while (!accepted);
-            return square;
-        }
-
-        static (ushort row, ushort col) GetCoordinatesFromNotation(ushort size)
-        {
-            bool accepted = false;
-            ushort row = 0;
-            ushort col = 0;
-
-            do
-            {
-                Console.Write($"Enter position: (A-{(char)('A' + size - 1)})(1-{size}): ");
-                var input = Console.ReadLine() ?? "";
-                if (InRange(input.Length, 2, 3))
-                {
-                    char columnChar = input[0];
-                    if (InRange(columnChar, 'A', 'A' + size))
-                    {
-                        col = (ushort)(columnChar - 'A');
-                        string rowChars = input[1..^0];
-                        if (ushort.TryParse(rowChars, out row))
-                        {
-                            row--;
-                            accepted = InRange(row, 0, size - 1);
-                        }
-                    }
-                }
-                if (!accepted)
-                {
-                    Console.WriteLine("Invalid entry or position out of range.");
-                }
-            } while (!accepted);
-            return (row, col);
-        }
-
-        static bool InRange(int value, int start, int end)
-        {
-            return value >= start && value <= end;
-        }
-
-        static bool symbolIsWide(string s)
-        {
-            return (s.EnumerateRunes().Count() >= 1);
         }
     }
 }

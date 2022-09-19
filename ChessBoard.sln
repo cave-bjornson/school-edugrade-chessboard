@@ -3,7 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32825.248
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChessBoard", "ChessBoard\ChessBoard.csproj", "{C015AC0B-3AF7-47C7-B6E3-EBC5040832FD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChessBoard", "ChessBoard\ChessBoard.csproj", "{C015AC0B-3AF7-47C7-B6E3-EBC5040832FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emojitester", "Emojitester\Emojitester.csproj", "{FA20FB1F-CC48-429C-B480-A45E0DBEAEBE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Emmaschess", "Emmaschess\Emmaschess.csproj", "{E12189E7-5B52-4BDF-973C-F862AC330623}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{C015AC0B-3AF7-47C7-B6E3-EBC5040832FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C015AC0B-3AF7-47C7-B6E3-EBC5040832FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C015AC0B-3AF7-47C7-B6E3-EBC5040832FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA20FB1F-CC48-429C-B480-A45E0DBEAEBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA20FB1F-CC48-429C-B480-A45E0DBEAEBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA20FB1F-CC48-429C-B480-A45E0DBEAEBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA20FB1F-CC48-429C-B480-A45E0DBEAEBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E12189E7-5B52-4BDF-973C-F862AC330623}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E12189E7-5B52-4BDF-973C-F862AC330623}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E12189E7-5B52-4BDF-973C-F862AC330623}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E12189E7-5B52-4BDF-973C-F862AC330623}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
