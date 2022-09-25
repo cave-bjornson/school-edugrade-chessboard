@@ -87,13 +87,12 @@ namespace ChessBoard
 
         
         /// <summary>
-        /// Validates symbol if the input consists of only one unicode <c>Rune</c>
+        /// Validates symbol if the input consists of only one unicode <c>TextElement</c>
         /// </summary>
         /// <param name="value"></param>
-        /// <returns><c>true</c> if just one rune.</returns>
+        /// <returns><c>true</c> if just one element.</returns>
         public static bool SymbolValidator(string value)
         {
-            //return value.EnumerateRunes().Count() <= 2;
             return new StringInfo(value).LengthInTextElements == 1;
         }
     }

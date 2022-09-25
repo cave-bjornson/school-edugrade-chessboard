@@ -45,6 +45,8 @@ namespace ChessBoard
                 Console.WriteLine("You're running on linux, you're on your own here!");
             }
 
+            Console.WriteLine("To use the defaults, just press enter when asked for input.");
+            
             int size = ReadAndValidateInput(
                 message: $"Enter size of chessboard (1-{MaxSize}). Default is 8: ",
                 errorMessage: $"Enter a _number_ between 1 and {MaxSize}: ",
@@ -62,7 +64,7 @@ namespace ChessBoard
             {
                 Console.WriteLine(String.Format("If pasting or inserting emoji character, " +
                     "input will look like {0}{0} or {0}.", Rune.ReplacementChar));
-                Console.WriteLine("Don't worry, Output will be preserved");
+                Console.WriteLine("Don't worry, output will be correct.");
             }
 
             // Local function to handle multiples chess-symbol inputs
@@ -84,7 +86,7 @@ namespace ChessBoard
              */
             string[] gridSquares = { whiteSquare, blackSquare };
 
-            // Gets the XY-coordinates
+            // Gets the XY-coordinates as a tuple.
             (char col, int row) = ReadAndValidateInput(
                 message: $"Enter position: (A-{(char)('A' + size - 1)})(1-{size}): ",
                 errorMessage: "Invalid entry or position out of range.",
@@ -106,7 +108,7 @@ namespace ChessBoard
             (int arrayRow, int arrayCol) = ChessXYToIndices(col, row, size);
             chessBoard.SetValue(piece, arrayRow, arrayCol);
 
-            // Write column headers.
+            // Write column headers A-.. .
             Console.Write("   ");
             for (char columnLetter = 'A'; columnLetter < (char)('A' + size); columnLetter++)
             {
