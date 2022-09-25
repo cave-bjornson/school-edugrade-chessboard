@@ -93,8 +93,8 @@ namespace ChessBoard
         /// <returns><c>true</c> if just one rune.</returns>
         public static bool SymbolValidator(string value)
         {
-            return value.EnumerateRunes().Count() == 1;
-            //return new StringInfo(value).LengthInTextElements <= 2;
+            //return value.EnumerateRunes().Count() <= 2;
+            return new StringInfo(value).LengthInTextElements == 1;
         }
     }
 }
