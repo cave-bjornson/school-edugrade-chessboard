@@ -45,6 +45,8 @@ namespace ChessBoard
                 Console.WriteLine("You're running on linux, you're on your own here!");
             }
 
+            Console.WriteLine("To use the defaults, just press enter when asked for input.");
+            
             int size = ReadAndValidateInput(
                 message: $"Enter size of chessboard (1-{MaxSize}). Default is 8: ",
                 errorMessage: $"Enter a _number_ between 1 and {MaxSize}: ",
@@ -62,12 +64,12 @@ namespace ChessBoard
             {
                 Console.WriteLine(String.Format("If pasting or inserting emoji character, " +
                     "input will look like {0}{0} or {0}.", Rune.ReplacementChar));
-                Console.WriteLine("Don't worry, Output will be preserved");
+                Console.WriteLine("Don't worry, output will be correct.");
             }
 
             // Local function to handle multiples chess-symbol inputs
             string ReadSymbol(string name, string defaultSymbol) => ReadAndValidateInput(
-                message: $"Enter character for {name} (default {defaultSymbol}): ",
+                message: $"Enter character for {name}. Default is {defaultSymbol}: ",
                 errorMessage: "Invalid entry, enter a _single_ character or leave blank.",
                 inputValidator: SymbolValidator,
                 defaultInput: defaultSymbol,
@@ -84,9 +86,9 @@ namespace ChessBoard
              */
             string[] gridSquares = { whiteSquare, blackSquare };
 
-            // Gets the XY-coordinates
+            // Gets the XY-coordinates as a tuple.
             (char col, int row) = ReadAndValidateInput(
-                message: $"Enter position: (A-{(char)('A' + size - 1)})(1-{size}): ",
+                message: $"Enter position: (A-{(char)('A' + size - 1)})(1-{size}) Default is A1: ",
                 errorMessage: "Invalid entry or position out of range.",
                 inputValidator: (s) => ChessCoordValidator(s, size),
                 onAccepted: (s) => (char.ToUpper(s[0]), int.Parse(s[1..])),
@@ -106,7 +108,7 @@ namespace ChessBoard
             (int arrayRow, int arrayCol) = ChessXYToIndices(col, row, size);
             chessBoard.SetValue(piece, arrayRow, arrayCol);
 
-            // Write column headers.
+            // Write column headers A-.. .
             Console.Write("   ");
             for (char columnLetter = 'A'; columnLetter < (char)('A' + size); columnLetter++)
             {
